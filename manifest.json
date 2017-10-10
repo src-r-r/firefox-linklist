@@ -5,7 +5,7 @@
   "version": "1.0",
 
   "description": "View &search all links on the web page",
-  "homepage_url": "https://localhost",
+  "homepage_url": "https://github.com/src-r-r/firefox-linklist",
   "icons": {
     "48": "icons/linklist-48.png"
   },
