@@ -1,0 +1,51 @@
+* {
+    left: 0;
+    top: 0;
+    padding: 0;
+    margin: 0;
+}
+
+input {
+    position: fixed;
+    height: 20px;
+    width: 100%;
+}
+
+a#clear {
+    position: fixed;
+    display: inline-block;
+    right: 0;
+}
+
+ul#all-links {
+    position: fixed;
+    overflow-x: scroll;
+    width: 100%;
+    height: 100%;
+    margin-top: 35px;
+}
+
+    ul#all-links li {
+        list-style: none;
+        text-align: left;
+        width: 100%;
+        padding: 2px 0px;
+        border-bottom: 1px solid #d9d9d9;
+    }
+
+    ul#all-links li.exactMatch {
+        font-style: italic;
+        background-color: lightyellow;
+    }
+
+        ul#all-links li a {
+            color: inherit;
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+        }
+
+        ul#all-links li a:hover {
+            background-color: lightgray;
+        }
