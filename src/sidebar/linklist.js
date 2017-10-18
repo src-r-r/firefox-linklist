@@ -7,21 +7,35 @@ $(function(){
      *          invalid.
      **/
     function filterLink(protocol, hostname, pageHref, href) {
-        console.log(`filtering ${href}`)
-        if (href.startsWith("/")) { /* relative link */
-            // The page href contains the full path, which we don't want.
-            re = new RegExp(/^[\w]{2,5}\:\/\/[^\?\&\/]*/, 'i')
-            baseUrl = re.exec(pageHref);
-            console.log(`Matching ${re} against ${pageHref} -> ${baseUrl} + ${href}`);
-            return baseUrl + href;
-        } else if (href.startsWith("#")) { /* name */
-            return pageHref + href;
-        } else if (href.match(/^moz\-/)) {
-            console.log("invalid link - mozilla extension");
+        // Case 1: Mozilla extension
+        // Sometimes an extension gets mixed in with the URLs. Ignore these.
+        if (protocol.startsWith("moz-extension://")){
+            console.log(`filtering [${protocol}] ${href} -> null: case 1`);
             return null;
         }
-        console.log(`Valid link: ${href}`);
-        return href;
+        // Case 2: URL length is < 1
+        //      these are cases where the URL is just a blank tag '#'
+        //      or just a slash '/'
+        if (href == null || href.length <= 1){
+            console.log(`filtering ${href} -> null: case 2`);
+            return null;
+        // Case 3: Easy match case. If the URL starts with <protocol>://
+        //      Simply return the href in this case.
+        } else if (href.match(/^[\w]{2,5}\:\/\//)) {
+            console.log(`filtering ${href} -> ${href}: case 3`);
+            return href;
+        // Case 4: name link
+        } else if (href.startsWith('#')) {
+            console.log(`filtering ${href} -> ${pageHref}${href}: case 4`);
+            return pageHref + href;
+        // Case 5: relative page href
+        //      return "protocol://hostname/<href>"
+        } else if (href.startsWith('/')) {
+            console.log(`filtering ${href} -> ${protocol}${hostname}${href}: case 5`);
+            return protocol + hostname + href;
+        }
+        console.log(`filtering ${href}: None of the above :()`);
+        return null;
     }
 
     function filterLinkList(){
@@ -59,13 +73,16 @@ $(function(){
             var href = filterLink(request.protocol,
                                   request.hostname,
                                   request.pageHref, al[i][0]);
-            var title = al[i][1]
-            if (href != null){
-                a = "<li><a href=\"" + href
-                    + "\" title=\"" + href +
-                    "\">" + title + "</a></li>";
-                $("ul#all-links").append(a);
+            if (href == null){
+                console.log("filtered link is null");
+                continue;
             }
+            var title = al[i][1]
+            a = "<li><a href=\"" + href
+                + "\" title=\"" + href +
+                "\">" + title + "</a></li>";
+            console.log(`ul.append("${a}")`);
+            $("ul#all-links").append(a);
         }
         filterLinkList($("input"));
     }
@@ -90,7 +107,7 @@ $(function(){
     }
 
     function onError(error){
-        console.log(`Error: ${error}`);
+        console.log("Error: " + error);
     }
 
     function notifyTabUpdateList(tabId, selectInfo){
@@ -116,12 +133,12 @@ $(function(){
 
     browser.runtime.onMessage.addListener(updateLinkList);
 
-
     browser.tabs.onActivated.addListener(notifyTabUpdateList);
     browser.tabs.onUpdated.addListener(notifyTabUpdateList);
     // browser.tabs.onSelectionChanged.addListener(notifyTabUpdateList);
 
     $(document).ready(function(){
+        notifyTabUpdateList(null, null);
         $("input").keyup(filterLinkList);
         $("input").keypress(filterLinkList);
         // $("input").change(filterLinkList);
